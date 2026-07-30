@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///C:/Users/joelf/Downloads/social-media-dashboard_2.html -->
 <html lang="en"><head><script>
 (function(){
   var t = localStorage.getItem('qfDashTheme');
@@ -259,6 +258,17 @@ html[data-theme="dark"] .small-btn{
   background:linear-gradient(180deg,#232834,#1b1f28);
   color:var(--ink);
 }
+
+.theme-switch-row{display:flex;align-items:center;justify-content:center;gap:10px;padding:22px 0 10px;}
+.theme-switch{position:relative;display:inline-block;width:46px;height:24px;}
+.theme-switch input{opacity:0;width:0;height:0;}
+.theme-switch .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;transition:.3s;border-radius:24px;}
+.theme-switch .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:#fff;transition:.3s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.theme-switch input:checked + .slider{background-color:#3a6ea5;}
+.theme-switch input:checked + .slider:before{transform:translateX(22px);}
+.theme-switch-label{font-size:.9rem;color:var(--sub);min-width:78px;text-align:left;}
+html[data-theme="dark"] .theme-switch .slider{background-color:#555;}
+html[data-theme="dark"] .theme-switch input:checked + .slider{background-color:#5b9bd5;}
 </style>
 </head>
 <body>
@@ -276,7 +286,7 @@ html[data-theme="dark"] .small-btn{
       <select id="locationSelect"><option value="main" selected="">Quality First Home Improvement</option></select>
       <button class="glossy-btn add-loc-btn" id="addLocationBtn">+ Add location</button>
       <button class="glossy-btn ghost-btn manage-btn" id="manageChannelsBtn">Manage channels</button>
-      <button class="glossy-btn live-btn manage-btn" id="toggleSheetBtn">🔴 Connect Google Sheet</button><button class="glossy-btn ghost-btn manage-btn theme-toggle" id="themeToggleBtn" title="Toggle light / dark mode">🌙 Dark mode</button>
+      
     </div>
   </div><div class="tabs" id="platformTabs"><div class="tab active" data-platform="facebook" style="background:linear-gradient(180deg, #1877F2dd, #1877F2);">
       <span class="dot" style="background:#fff"></span>Facebook
@@ -384,7 +394,7 @@ html[data-theme="dark"] .small-btn{
     Data comes from either manual entry, a one-off CSV import, or a live-synced Google Sheet — all saved to your browser account for this dashboard, not shared with other users. Starting numbers were imported from the Metricool report for <strong>Apr 1 – Jul 28, 2026</strong>.
   </div>
 
-<div class="glass sheet-panel" id="sheetPanel">
+<div class="glass sheet-panel show" id="sheetPanel">
     <div class="panel-head"><h2 style="font-size:14px;"><span class="live-dot" id="liveDot" style="display:none;"></span>Live data source — Google Sheets</h2><span class="sub" id="lastSyncedLabel">Not connected yet</span></div>
     <div class="sheet-row">
       <input type="text" id="sheetUrlInput" placeholder="Paste the published CSV link for your Google Sheet…">
@@ -397,7 +407,7 @@ html[data-theme="dark"] .small-btn{
       <strong>How to get the link:</strong> in Google Sheets, go to <code>File → Share → Publish to web</code>, choose the sheet tab, set format to <code>Comma-separated values (.csv)</code>, click Publish, and paste that link above.<br>
       <strong>Expected columns</strong> (one row per channel per date): <code>channel, date, followers, impressions, interactions, posts, reach, engagement</code>. Unrecognized channel names are added automatically. Leave a cell blank if a metric doesn't apply.
     </div>
-  </div></div>
+  </div><div class="theme-switch-row"><span aria-hidden="true">☀️</span><label class="theme-switch"><input type="checkbox" id="themeToggleCheckbox"><span class="slider"></span></label><span aria-hidden="true">🌙</span><span id="themeToggleLabel" class="theme-switch-label">Light mode</span></div></div>
 
 <script>
 (function(){
@@ -1109,7 +1119,6 @@ async function init(){
   document.getElementById('manageChannelsBtn').addEventListener('click', ()=> document.getElementById('chanManager').classList.toggle('show'));
   document.getElementById('addChanBtn').addEventListener('click', addChannel);
 
-  document.getElementById('toggleSheetBtn').addEventListener('click', ()=> document.getElementById('sheetPanel').classList.toggle('show'));
   document.getElementById('saveSheetBtn').addEventListener('click', async ()=>{
     sheetConfig.url = document.getElementById('sheetUrlInput').value.trim();
     await saveSheetConfig(currentLocationId, sheetConfig);
@@ -1141,19 +1150,21 @@ init();
 (function(){
   function apply(theme){
     document.documentElement.setAttribute('data-theme', theme);
-    var btn = document.getElementById('themeToggleBtn');
-    if(btn) btn.textContent = theme === 'dark' ? '☀️ Light mode' : '🌙 Dark mode';
+    var cb = document.getElementById('themeToggleCheckbox');
+    if(cb) cb.checked = (theme === 'dark');
+    var lbl = document.getElementById('themeToggleLabel');
+    if(lbl) lbl.textContent = theme === 'dark' ? 'Dark mode' : 'Light mode';
   }
   apply(document.documentElement.getAttribute('data-theme') || 'light');
-  var btn = document.getElementById('themeToggleBtn');
-  if(btn){
-    btn.addEventListener('click', function(){
-      var current = document.documentElement.getAttribute('data-theme');
-      var next = current === 'dark' ? 'light' : 'dark';
+  var cb = document.getElementById('themeToggleCheckbox');
+  if(cb){
+    cb.addEventListener('change', function(){
+      var next = cb.checked ? 'dark' : 'light';
       localStorage.setItem('qfDashTheme', next);
       location.reload();
     });
   }
 })();
 </script>
+
 </body></html>
