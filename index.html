@@ -4,7 +4,7 @@
 
 <title>Social Media Dashboard — Quality First Home Improvement</title>
 <link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5/papaparse.min.js"></script>
 <style>
@@ -196,22 +196,33 @@
       <button class="glossy-btn ghost-btn manage-btn" id="manageChannelsBtn">Manage channels</button>
       <button class="glossy-btn live-btn manage-btn" id="toggleSheetBtn">🔴 Connect Google Sheet</button>
     </div>
-  </div>
+  </div><div class="tabs" id="platformTabs"><div class="tab active" data-platform="facebook" style="background:linear-gradient(180deg, #1877F2dd, #1877F2);">
+      <span class="dot" style="background:#fff"></span>Facebook
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="instagram" style="">
+      <span class="dot" style="background:#D62976"></span>Instagram
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#D62976" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="threads" style="">
+      <span class="dot" style="background:#4A4A4A"></span>Threads
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#4A4A4A" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="twitter" style="">
+      <span class="dot" style="background:#111111"></span>X (Twitter)
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#111111" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="linkedin" style="">
+      <span class="dot" style="background:#0A66C2"></span>LinkedIn
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#0A66C2" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="pinterest" style="">
+      <span class="dot" style="background:#E60023"></span>Pinterest
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#E60023" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="youtube" style="">
+      <span class="dot" style="background:#FF0000"></span>YouTube
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#FF0000" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="gbp" style="">
+      <span class="dot" style="background:#4285F4"></span>Google Business
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#4285F4" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div></div>
 
-  <div class="glass sheet-panel" id="sheetPanel">
-    <div class="panel-head"><h2 style="font-size:14px;"><span class="live-dot" id="liveDot" style="display:none;"></span>Live data source — Google Sheets</h2><span class="sub" id="lastSyncedLabel">Not connected yet</span></div>
-    <div class="sheet-row">
-      <input type="text" id="sheetUrlInput" placeholder="Paste the published CSV link for your Google Sheet…">
-      <button class="glossy-btn small-btn" id="saveSheetBtn">Save</button>
-      <button class="glossy-btn live-btn" id="syncNowBtn">Sync now</button>
-    </div>
-    <label class="auto-toggle"><input type="checkbox" id="autoRefreshToggle"> Auto-refresh every 5 minutes while this tab stays open</label>
-    <div class="sheet-status" id="sheetStatus"></div>
-    <div class="sheet-help">
-      <strong>How to get the link:</strong> in Google Sheets, go to <code>File → Share → Publish to web</code>, choose the sheet tab, set format to <code>Comma-separated values (.csv)</code>, click Publish, and paste that link above.<br>
-      <strong>Expected columns</strong> (one row per channel per date): <code>channel, date, followers, impressions, interactions, posts, reach, engagement</code>. Unrecognized channel names are added automatically. Leave a cell blank if a metric doesn't apply.
-    </div>
-  </div>
+  
 
   <div class="glass chan-manager" id="chanManager">
     <div class="panel-head"><h2 style="font-size:14px;">Channels shown on this dashboard</h2><span class="sub">Add a channel you use, or remove one you don't</span></div>
@@ -283,31 +294,7 @@
     </div>
   </div>
 
-  <div class="tabs" id="platformTabs"><div class="tab active" data-platform="facebook" style="background:linear-gradient(180deg, #1877F2dd, #1877F2);">
-      <span class="dot" style="background:#fff"></span>Facebook
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div><div class="tab " data-platform="instagram" style="">
-      <span class="dot" style="background:#D62976"></span>Instagram
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#D62976" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div><div class="tab " data-platform="threads" style="">
-      <span class="dot" style="background:#4A4A4A"></span>Threads
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#4A4A4A" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div><div class="tab " data-platform="twitter" style="">
-      <span class="dot" style="background:#111111"></span>X (Twitter)
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#111111" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div><div class="tab " data-platform="linkedin" style="">
-      <span class="dot" style="background:#0A66C2"></span>LinkedIn
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#0A66C2" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div><div class="tab " data-platform="pinterest" style="">
-      <span class="dot" style="background:#E60023"></span>Pinterest
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#E60023" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div><div class="tab " data-platform="youtube" style="">
-      <span class="dot" style="background:#FF0000"></span>YouTube
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#FF0000" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div><div class="tab " data-platform="gbp" style="">
-      <span class="dot" style="background:#4285F4"></span>Google Business
-      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#4285F4" stroke-opacity=".35" stroke-width="1.4"></line></svg>
-    </div></div>
+  
 
   <div id="platformPanels"></div>
 
@@ -315,7 +302,20 @@
     Data comes from either manual entry, a one-off CSV import, or a live-synced Google Sheet — all saved to your browser account for this dashboard, not shared with other users. Starting numbers were imported from the Metricool report for <strong>Apr 1 – Jul 28, 2026</strong>.
   </div>
 
-</div>
+<div class="glass sheet-panel" id="sheetPanel">
+    <div class="panel-head"><h2 style="font-size:14px;"><span class="live-dot" id="liveDot" style="display:none;"></span>Live data source — Google Sheets</h2><span class="sub" id="lastSyncedLabel">Not connected yet</span></div>
+    <div class="sheet-row">
+      <input type="text" id="sheetUrlInput" placeholder="Paste the published CSV link for your Google Sheet…">
+      <button class="glossy-btn small-btn" id="saveSheetBtn">Save</button>
+      <button class="glossy-btn live-btn" id="syncNowBtn">Sync now</button>
+    </div>
+    <label class="auto-toggle"><input type="checkbox" id="autoRefreshToggle"> Auto-refresh every 5 minutes while this tab stays open</label>
+    <div class="sheet-status" id="sheetStatus"></div>
+    <div class="sheet-help">
+      <strong>How to get the link:</strong> in Google Sheets, go to <code>File → Share → Publish to web</code>, choose the sheet tab, set format to <code>Comma-separated values (.csv)</code>, click Publish, and paste that link above.<br>
+      <strong>Expected columns</strong> (one row per channel per date): <code>channel, date, followers, impressions, interactions, posts, reach, engagement</code>. Unrecognized channel names are added automatically. Leave a cell blank if a metric doesn't apply.
+    </div>
+  </div></div>
 
 <script>
 (function(){
@@ -1051,6 +1051,7 @@ async function init(){
 init();
 })();
 </script>
+
 
 
 </body></html>
