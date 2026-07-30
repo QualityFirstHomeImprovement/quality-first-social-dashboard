@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)file:///C:/Users/joelf/Downloads/social-media-dashboard_2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Social Media Dashboard — Quality First Home Improvement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./social-media-dashboard_files/css2" rel="stylesheet">
+<script src="./social-media-dashboard_files/chart.umd.min.js.download"></script>
+<script src="./social-media-dashboard_files/papaparse.min.js.download"></script>
+<style>
+  :root{
+    --paper:#EFF2F6;
+    --panel:#FFFFFF;
+    --ink:#1C232D;
+    --sub:#6E7686;
+    --line:#E3E7EE;
+    --line-strong:#D3D9E3;
+    --accent:#2C6E93;
+    --accent-light:#4C93BB;
+    --accent-soft:#E5F0F6;
+    --rust:#C05A22;
+    --rust-light:#DE7A44;
+    --rust-soft:#FBEADC;
+    --up:#1E8A5B;
+    --down:#C0432E;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1000px 500px at 12% -8%, #ffffff 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #f4f8fb 0%, transparent 60%),
+      var(--paper);
+  }
+  h1,h2,h3{margin:0;font-family:"Space Grotesk",sans-serif;}
+  .num{font-family:"IBM Plex Mono",monospace;}
+
+  .glass{
+    background:linear-gradient(180deg,#ffffff 0%, #fbfcfe 60%, #f6f8fb 100%);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    position:relative;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 16px 30px -18px rgba(28,40,55,.28), 0 2px 6px rgba(28,40,55,.06);
+    overflow:hidden;
+  }
+  .glass::before{content:"";position:absolute;top:0;left:0;right:0;height:46%;
+    background:linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,0));pointer-events:none;}
+  .glass::after{content:"";position:absolute;top:0;left:6%;width:34%;height:100%;
+    background:linear-gradient(100deg, rgba(255,255,255,.35), rgba(255,255,255,0) 55%);
+    transform:skewX(-14deg);pointer-events:none;opacity:.6;}
+  .glossy-btn{border:1px solid rgba(0,0,0,.06);border-radius:10px;cursor:pointer;font-family:inherit;font-weight:600;
+    position:relative;overflow:hidden;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 6px 14px -6px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.12);
+    transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;}
+  .glossy-btn::before{content:"";position:absolute;top:0;left:0;right:0;height:52%;
+    background:linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0));pointer-events:none;}
+  .glossy-btn:hover{transform:translateY(-1px);filter:brightness(1.05);}
+  .glossy-btn:active{transform:translateY(0);filter:brightness(.97);}
+  .glossy-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;filter:none;}
+  .ghost-btn{background:linear-gradient(180deg,#fff,#f2f4f8);color:var(--ink);}
+  .live-btn{background:linear-gradient(180deg,#3FBE87,#1E8A5B);color:#fff;}
+
+  .app{max-width:1280px;margin:0 auto;padding:26px 26px 60px;}
+  .topbar{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+    background:linear-gradient(160deg,#3E8CB5 0%, var(--accent) 55%, #184D68 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.55) inset, 0 6px 14px -6px rgba(44,110,147,.6);position:relative;}
+  .brand .mark::after{content:"";position:absolute;top:6px;left:7px;width:12px;height:6px;border-radius:6px;
+    background:rgba(255,255,255,.5);filter:blur(1px);}
+  .brand .eyebrow{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:700;}
+  .brand h1{font-size:21px;font-weight:700;margin-top:2px;}
+
+  .loc-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  select{font-family:inherit;font-size:13px;border:1px solid var(--line-strong);border-radius:10px;
+    background:linear-gradient(180deg,#fff, #f4f6f9);padding:9px 12px;color:var(--ink);box-shadow:0 1px 0 rgba(255,255,255,.6) inset;}
+  .add-loc-btn{background:linear-gradient(180deg, var(--accent-soft), #d9e9f1);color:var(--accent);padding:9px 13px;font-size:12.8px;}
+  .manage-btn{padding:9px 13px;font-size:12.8px;border:1px solid var(--line-strong);}
+
+  .chan-manager{display:none;margin-bottom:16px;padding:18px 20px;}
+  .chan-manager.show{display:block;}
+  .chan-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .chan-chip{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line-strong);border-radius:999px;padding:6px 8px 6px 10px;font-size:12.5px;}
+  .chan-chip .dot{width:9px;height:9px;border-radius:50%;}
+  .chan-chip button{border:none;background:transparent;color:var(--down);cursor:pointer;font-size:14px;line-height:1;padding:0 2px;font-weight:700;}
+  .chan-add-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .chan-add-row input[type=text]{width:180px;}
+  .chan-add-row input[type=color]{width:38px;height:34px;padding:2px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;}
+
+  .sheet-panel{display:none;margin-bottom:20px;padding:20px 22px;}
+  .sheet-panel.show{display:block;}
+  .sheet-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .sheet-row input[type=text]{flex:1;min-width:260px;font-family:"IBM Plex Mono",monospace;font-size:12.2px;
+    border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;background:#fff;}
+  .sheet-status{font-size:12px;color:var(--sub);margin-top:10px;}
+  .sheet-status.err{color:var(--down);}
+  .sheet-status.ok{color:var(--up);}
+  .sheet-help{font-size:12px;color:var(--sub);margin-top:12px;line-height:1.6;background:#F7F9FB;border:1px dashed var(--line-strong);border-radius:10px;padding:12px 14px;}
+  .sheet-help code{background:#EAEEF3;padding:1px 5px;border-radius:5px;font-size:11.5px;}
+  .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--up);margin-right:6px;box-shadow:0 0 0 3px rgba(30,138,91,.15);}
+  .auto-toggle{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--sub);margin-top:10px;}
+  .auto-toggle input{accent-color:var(--up);}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px;}
+  .range-group{display:flex;border-radius:11px;overflow:hidden;background:#fff;border:1px solid var(--line-strong);
+    box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 3px 10px -6px rgba(28,40,55,.25);}
+  .range-group button{font-family:inherit;font-size:13px;border:none;background:transparent;padding:9px 15px;cursor:pointer;
+    color:var(--sub);border-right:1px solid var(--line);font-weight:500;}
+  .range-group button:last-child{border-right:none;}
+  .range-group button.active{background:linear-gradient(180deg, var(--accent-light), var(--accent));color:#fff;font-weight:700;
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 4px 10px -4px rgba(44,110,147,.55);}
+  .custom-range{display:none;gap:8px;align-items:center;margin-top:10px;}
+  .custom-range.show{display:flex;}
+  .custom-range input[type=date]{border:1px solid var(--line-strong);border-radius:9px;padding:8px 10px;font-family:inherit;font-size:12.8px;background:#fff;}
+  .apply-btn{background:linear-gradient(180deg, var(--rust-light), var(--rust));color:#fff;padding:9px 15px;font-size:12.8px;}
+  .period-note{font-size:12px;color:var(--sub);margin:10px 0 22px;font-family:"IBM Plex Mono",monospace;}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:22px;}
+  .card{padding:16px 18px;}
+  .card .label{font-size:11.5px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.04em;position:relative;z-index:1;}
+  .card .value{font-size:25px;font-weight:600;margin-top:6px;position:relative;z-index:1;}
+  .card .delta{font-size:12.5px;font-weight:600;margin-top:4px;position:relative;z-index:1;}
+  .delta.up{color:var(--up);} .delta.down{color:var(--down);} .delta.flat{color:var(--sub);}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .tab{padding:9px 15px 9px 12px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;color:var(--sub);
+    display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#fff,#f2f4f8);border:1px solid var(--line-strong);
+    box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 3px 8px -5px rgba(28,40,55,.25);}
+  .tab .dot{width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.03);}
+  .tab.active{color:#fff;border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 6px 14px -6px rgba(0,0,0,.4);}
+  .tab .spark{width:38px;height:16px;opacity:.9;}
+
+  .panel{padding:22px 24px;margin-bottom:22px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:16px;position:relative;z-index:1;}
+  .panel-head h2{font-size:16px;font-weight:700;}
+  .panel-head .sub{font-size:12px;color:var(--sub);}
+  .row2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;position:relative;z-index:1;}
+  @media (max-width:880px){.row2{grid-template-columns:1fr;}}
+  .chart-wrap{position:relative;height:250px;z-index:1;}
+  .chart-wrap.short{height:220px;}
+
+  .plat-head{display:flex;align-items:center;gap:10px;margin-bottom:4px;position:relative;z-index:1;justify-content:space-between;flex-wrap:wrap;}
+  .plat-head-left{display:flex;align-items:center;gap:10px;}
+  .plat-head .swatch{width:12px;height:12px;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .plat-head h2{font-size:19px;}
+
+  .metric-toggle{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--sub);position:relative;z-index:1;margin-top:10px;}
+  .metric-toggle label{display:flex;align-items:center;gap:5px;cursor:pointer;}
+  .metric-toggle input{accent-color:var(--accent);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;position:relative;z-index:1;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--sub);padding:9px 10px;border-bottom:1px solid var(--line);}
+  td{padding:10px 10px;border-bottom:1px solid #F0F2F6;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .muted{color:var(--sub);}
+  .empty{color:var(--sub);font-size:13px;padding:14px 4px;}
+
+  .form-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;position:relative;z-index:1;}
+  .form-row input, .form-row select{font-family:inherit;font-size:12.8px;border:1px solid var(--line-strong);border-radius:9px;
+    padding:8px 10px;background:linear-gradient(180deg,#fff,#f7f9fb);box-shadow:inset 0 1px 2px rgba(28,40,55,.05);}
+  .form-row input[type=number]{width:105px;}
+  .form-row input[type=text]{width:230px;}
+  .form-row input[type=date]{width:148px;}
+  .save-btn{background:linear-gradient(180deg, var(--rust-light), var(--rust));color:#fff;padding:9px 16px;font-size:13px;}
+  .small-btn{font-size:12px;padding:7px 12px;background:linear-gradient(180deg,#fff, var(--accent-soft));color:var(--accent);border:1px solid var(--line-strong);}
+  .csv-label{font-size:12px;padding:7px 12px;background:linear-gradient(180deg,#fff, #fdf1e8);color:var(--rust);border:1px solid var(--line-strong);border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 0 rgba(255,255,255,.5) inset;}
+  .csv-hint{font-size:11.5px;color:var(--sub);margin-top:6px;}
+
+  .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative;z-index:1;}
+  @media (max-width:700px){.demo-grid{grid-template-columns:1fr;}}
+  .bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px;}
+  .bar .track{flex:1;height:7px;background:#EEF1F5;border-radius:5px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);}
+  .bar .fill{height:100%;border-radius:5px;background-image:linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0));}
+  .bar .name{width:155px;flex-shrink:0;}
+  .bar .pct{width:44px;text-align:right;color:var(--sub);font-family:"IBM Plex Mono",monospace;font-size:11.5px;}
+
+  .footnote{font-size:12px;color:var(--sub);margin-top:26px;line-height:1.65;max-width:820px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <div class="eyebrow">Organic Social Performance</div>
+        <h1 id="locTitle">Social Media Dashboard — Quality First Home Improvement</h1>
+      </div>
+    </div>
+    <div class="loc-row">
+      <select id="locationSelect"><option value="main" selected="">Quality First Home Improvement</option></select>
+      <button class="glossy-btn add-loc-btn" id="addLocationBtn">+ Add location</button>
+      <button class="glossy-btn ghost-btn manage-btn" id="manageChannelsBtn">Manage channels</button>
+      <button class="glossy-btn live-btn manage-btn" id="toggleSheetBtn">🔴 Connect Google Sheet</button>
+    </div>
+  </div>
+
+  <div class="glass sheet-panel" id="sheetPanel">
+    <div class="panel-head"><h2 style="font-size:14px;"><span class="live-dot" id="liveDot" style="display:none;"></span>Live data source — Google Sheets</h2><span class="sub" id="lastSyncedLabel">Not connected yet</span></div>
+    <div class="sheet-row">
+      <input type="text" id="sheetUrlInput" placeholder="Paste the published CSV link for your Google Sheet…">
+      <button class="glossy-btn small-btn" id="saveSheetBtn">Save</button>
+      <button class="glossy-btn live-btn" id="syncNowBtn">Sync now</button>
+    </div>
+    <label class="auto-toggle"><input type="checkbox" id="autoRefreshToggle"> Auto-refresh every 5 minutes while this tab stays open</label>
+    <div class="sheet-status" id="sheetStatus"></div>
+    <div class="sheet-help">
+      <strong>How to get the link:</strong> in Google Sheets, go to <code>File → Share → Publish to web</code>, choose the sheet tab, set format to <code>Comma-separated values (.csv)</code>, click Publish, and paste that link above.<br>
+      <strong>Expected columns</strong> (one row per channel per date): <code>channel, date, followers, impressions, interactions, posts, reach, engagement</code>. Unrecognized channel names are added automatically. Leave a cell blank if a metric doesn't apply.
+    </div>
+  </div>
+
+  <div class="glass chan-manager" id="chanManager">
+    <div class="panel-head"><h2 style="font-size:14px;">Channels shown on this dashboard</h2><span class="sub">Add a channel you use, or remove one you don't</span></div>
+    <div class="chan-list" id="chanList">
+    <div class="chan-chip"><span class="dot" style="background:#1877F2"></span>Facebook
+      <button data-remove="facebook" title="Remove channel">×</button>
+    </div>
+    <div class="chan-chip"><span class="dot" style="background:#D62976"></span>Instagram
+      <button data-remove="instagram" title="Remove channel">×</button>
+    </div>
+    <div class="chan-chip"><span class="dot" style="background:#4A4A4A"></span>Threads
+      <button data-remove="threads" title="Remove channel">×</button>
+    </div>
+    <div class="chan-chip"><span class="dot" style="background:#111111"></span>X (Twitter)
+      <button data-remove="twitter" title="Remove channel">×</button>
+    </div>
+    <div class="chan-chip"><span class="dot" style="background:#0A66C2"></span>LinkedIn
+      <button data-remove="linkedin" title="Remove channel">×</button>
+    </div>
+    <div class="chan-chip"><span class="dot" style="background:#E60023"></span>Pinterest
+      <button data-remove="pinterest" title="Remove channel">×</button>
+    </div>
+    <div class="chan-chip"><span class="dot" style="background:#FF0000"></span>YouTube
+      <button data-remove="youtube" title="Remove channel">×</button>
+    </div>
+    <div class="chan-chip"><span class="dot" style="background:#4285F4"></span>Google Business
+      <button data-remove="gbp" title="Remove channel">×</button>
+    </div></div>
+    <div class="chan-add-row">
+      <input type="text" id="newChanName" placeholder="Channel name (e.g. TikTok)">
+      <input type="color" id="newChanColor" value="#2C6E93">
+      <button class="glossy-btn small-btn" id="addChanBtn">+ Add channel</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="range-group" id="rangeGroup">
+      <button data-range="daily">Daily</button>
+      <button data-range="weekly">Weekly</button>
+      <button data-range="monthly">Monthly</button>
+      <button data-range="yoy">Year over year</button>
+      <button data-range="custom" class="active">Custom</button>
+    </div>
+  </div>
+  <div class="custom-range show" id="customRange">
+    <input type="date" id="customStart"><span class="muted">to</span><input type="date" id="customEnd">
+    <button class="glossy-btn apply-btn" id="applyCustom">Apply</button>
+  </div>
+  <div class="period-note" id="periodNote">2026-04-01 → 2026-07-28  ·  compared with 2025-12-03 → 2026-03-31</div>
+
+  <div class="cards" id="overviewCards">
+    <div class="glass card"><div class="label">Total followers</div><div class="value num">5.7K</div><div class="delta flat">no prior data</div></div>
+  
+    <div class="glass card"><div class="label">Total impressions / views</div><div class="value num">387K</div><div class="delta flat">no prior data</div></div>
+  
+    <div class="glass card"><div class="label">Total interactions</div><div class="value num">4K</div><div class="delta flat">no prior data</div></div>
+  
+    <div class="glass card"><div class="label">Total posts published</div><div class="value num">2K</div><div class="delta flat">no prior data</div></div>
+  </div>
+
+  <div class="row2" style="margin-bottom:22px;">
+    <div class="glass panel">
+      <div class="panel-head"><h2>Impressions / views by channel</h2><span class="sub">Selected period</span></div>
+      <div class="chart-wrap"><canvas id="platformBarChart"></canvas></div>
+    </div>
+    <div class="glass panel">
+      <div class="panel-head"><h2>Share of interactions</h2><span class="sub">Selected period</span></div>
+      <div class="chart-wrap"><canvas id="shareDonutChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tabs" id="platformTabs"><div class="tab active" data-platform="facebook" style="background:linear-gradient(180deg, #1877F2dd, #1877F2);">
+      <span class="dot" style="background:#fff"></span>Facebook
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#ffffff" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="instagram" style="">
+      <span class="dot" style="background:#D62976"></span>Instagram
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#D62976" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="threads" style="">
+      <span class="dot" style="background:#4A4A4A"></span>Threads
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#4A4A4A" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="twitter" style="">
+      <span class="dot" style="background:#111111"></span>X (Twitter)
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#111111" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="linkedin" style="">
+      <span class="dot" style="background:#0A66C2"></span>LinkedIn
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#0A66C2" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="pinterest" style="">
+      <span class="dot" style="background:#E60023"></span>Pinterest
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#E60023" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="youtube" style="">
+      <span class="dot" style="background:#FF0000"></span>YouTube
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#FF0000" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div><div class="tab " data-platform="gbp" style="">
+      <span class="dot" style="background:#4285F4"></span>Google Business
+      <svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="#4285F4" stroke-opacity=".35" stroke-width="1.4"></line></svg>
+    </div></div>
+
+  <div id="platformPanels"></div>
+
+  <div class="footnote">
+    Data comes from either manual entry, a one-off CSV import, or a live-synced Google Sheet — all saved to your browser account for this dashboard, not shared with other users. Starting numbers were imported from the Metricool report for <strong>Apr 1 – Jul 28, 2026</strong>.
+  </div>
+
+</div>
+
+<script>
+(function(){
+
+const DEFAULT_PLATFORMS = [
+  {id:'facebook',  name:'Facebook',        color:'#1877F2'},
+  {id:'instagram', name:'Instagram',       color:'#D62976'},
+  {id:'threads',   name:'Threads',         color:'#4A4A4A'},
+  {id:'twitter',   name:'X (Twitter)',     color:'#111111'},
+  {id:'linkedin',  name:'LinkedIn',        color:'#0A66C2'},
+  {id:'pinterest', name:'Pinterest',       color:'#E60023'},
+  {id:'youtube',   name:'YouTube',         color:'#FF0000'},
+  {id:'gbp',       name:'Google Business', color:'#4285F4'},
+];
+const AUTO_COLORS = ['#7C5CFF','#00A99D','#F2A93B','#EF6C6C','#3AAED8','#9C6ADE','#5AC17E','#E0578C'];
+
+const METRICS = [
+  {id:'followers',    label:'Followers'},
+  {id:'impressions',  label:'Impressions / Views'},
+  {id:'interactions', label:'Interactions'},
+  {id:'posts',        label:'Posts published'},
+  {id:'reach',        label:'Avg. reach per post'},
+  {id:'engagement',   label:'Engagement rate'},
+];
+
+const REPORT_PERIOD = {start:'2026-04-01', end:'2026-07-28'};
+const TODAY = new Date('2026-07-29');
+
+// ---------- seed data (imported from the Metricool PDF, 01 Apr 26 - 28 Jul 26) ----------
+function seedEntries(){
+  const d = REPORT_PERIOD.end;
+  return [
+    {date:d, platform:'facebook',  followers:1248, impressions:268390, interactions:2034, posts:612, reach:27.45, engagement:11.85},
+    {date:d, platform:'instagram', followers:917,  impressions:71310,  interactions:263,  posts:574, reach:19.74, engagement:2.42},
+    {date:d, platform:'threads',   followers:119,  impressions:57,     interactions:1,    posts:15,  reach:null,  engagement:1.75},
+    {date:d, platform:'twitter',   followers:1522, impressions:2406,   interactions:64,   posts:250, reach:null,  engagement:2.66},
+    {date:d, platform:'linkedin',  followers:658,  impressions:4262,   interactions:116,  posts:249, reach:null,  engagement:2.77},
+    {date:d, platform:'pinterest', followers:1022, impressions:38910,  interactions:1558, posts:313, reach:null,  engagement:4},
+    {date:d, platform:'youtube',   followers:188,  impressions:1603,   interactions:8,    posts:0,   reach:null,  engagement:null},
+    {date:d, platform:'gbp',       followers:null, impressions:0,      interactions:0,    posts:25,  reach:null,  engagement:null},
+  ];
+}
+function seedTopPosts(){
+  return {
+    facebook:[
+      {date:'2026-04-13', text:'Tax Refund Season Meets "Don\u2019t Risk It" Season...', impressions:545, interactions:29},
+      {date:'2026-05-01', text:'There\u2019s a big difference between getting a quote and getting an education...', impressions:333, interactions:1},
+      {date:'2026-04-29', text:'Concord homeowners: if your front door sticks, slams, or leaks air...', impressions:254, interactions:7},
+      {date:'2026-04-17', text:'Story time (Sacramento): Homeowner called us for "just gutters"...', impressions:248, interactions:16},
+      {date:'2026-04-01', text:'We thought about an April Fools joke... But your home is no joke.', impressions:231, interactions:12},
+    ],
+    instagram:[
+      {date:'2026-05-22', text:'Transform your house into the home you\u2019ve always envisioned...', impressions:143, interactions:9},
+      {date:'2026-04-03', text:'Tax Refund Season Meets "Don\u2019t Risk It" Season...', impressions:73, interactions:6},
+      {date:'2026-07-02', text:'You\u2019re invited! Swing by our office on Tuesday...', impressions:94, interactions:4},
+      {date:'2026-06-16', text:'Quality exterior work shows in the details, not just...', impressions:47, interactions:4},
+      {date:'2026-04-10', text:'Unlike traditional paint, @texcote Coolwall\u00ae is de...', impressions:82, interactions:5},
+    ],
+    threads:[
+      {date:'2026-04-03', text:'Quality First Roofers. Backed by GAF, built to last...', impressions:1, interactions:1},
+      {date:'2026-07-02', text:'You\u2019re invited! Swing by our office on Tuesday...', impressions:10, interactions:0},
+      {date:'2026-07-06', text:'Reminder: Job Fair Tomorrow!', impressions:7, interactions:0},
+    ],
+    twitter:[
+      {date:'2026-06-15', text:'Many homeowners wait until something breaks...', impressions:9, interactions:4},
+      {date:'2026-06-15', text:'Northern California weather can be tough on homes...', impressions:48, interactions:2},
+      {date:'2026-07-17', text:'NorCal summer temperatures outside vs. inside...', impressions:21, interactions:1},
+    ],
+    linkedin:[
+      {date:'2026-04-03', text:'Tax Refund Season Meets "Don\u2019t Risk It" Season...', impressions:537, interactions:5},
+      {date:'2026-04-26', text:'In Reno, we see this a lot: homeowners...', impressions:29, interactions:3},
+      {date:'2026-04-26', text:'Sacramento homeowners: if your...', impressions:13, interactions:3},
+    ],
+    pinterest:[
+      {date:'2026-04-03', text:'Quality First Roofers. Backed by GAF, built to last...', impressions:20190, interactions:55},
+      {date:'2026-06-25', text:'Quality First Home Improvement (Pin)', impressions:2448, interactions:93},
+    ],
+    youtube:[
+      {date:'2025-02-27', text:'Beautiful Duralum Patio Cover Upgrade | Stockton...', impressions:109, interactions:1},
+      {date:'2025-12-10', text:'How Can An Aging Or Damaged Roof Affect Home Insurance...', impressions:74, interactions:0},
+      {date:'2025-04-17', text:'Full Roof Replacement | Valley Springs, CA', impressions:31, interactions:0},
+    ],
+    gbp:[
+      {date:'2026-07-01', text:'Want to learn more about our team, our process, and our work?...', impressions:0, interactions:0},
+      {date:'2026-07-16', text:'The right contractor is the one you\u2019ve actually researched...', impressions:0, interactions:0},
+    ],
+  };
+}
+function seedDemographics(){
+  return {
+    facebook:{
+      countries:[['United States',94.07],['India',2.48],['Bangladesh',1.76],['Philippines',1.68],['China',1.52]],
+      cities:[['Sacramento, CA',6.65],['Citrus Heights, CA',3.69],['San Jose, CA',3.45],['Reno, NV',2.88],['Roseville, CA',2.24]],
+    },
+    instagram:{
+      countries:[['United States',81.62],['India',2.22],['Canada',1.64],['Philippines',1.52],['Brazil',1.41]],
+      cities:[['Citrus Heights, CA',4.80],['Roseville, CA',4.10],['Reno, NV',3.51],['Sacramento, CA',3.40],['San Jose, CA',2.46]],
+      gender:[['Male',40.98],['Female',29.74],['Unknown',29.27]],
+    },
+    linkedin:{
+      countries:[['United States',78.27],['India',4.71],['China',2.58],['Pakistan',2.43],['United Kingdom',1.67]],
+      cities:[['Greater Sacramento',24.92],['San Francisco Bay Area',14.89],['Greater Reno Area',5.02],['Los Angeles Metro',3.50],['Greater Phoenix Area',1.37]],
+      industries:[['Retail',23.71],['Professional Services',14.44],['Construction',11.85],['Technology, Info & Media',8.81],['Manufacturing',6.99]],
+    },
+  };
+}
+
+// ---------- storage helpers ----------
+const STORAGE_LOCATIONS_KEY = 'sm-dashboard:locations';
+const STORAGE_CHANNELS_KEY = 'sm-dashboard:channels';
+const STORAGE_METRICS_KEY = 'sm-dashboard:visibleMetrics';
+function locKey(id){ return 'sm-dashboard:location:'+id; }
+function sheetKey(id){ return 'sm-dashboard:sheet:'+id; }
+
+// Works two ways: inside Claude.ai's artifact viewer it uses window.storage (per-account,
+// synced across your Claude sessions). Hosted anywhere else (e.g. GitHub Pages) there is no
+// window.storage, so it falls back to the browser's own localStorage — data still saves and
+// reloads, but only in that one browser/device, since there's no account to sync it through.
+const hasClaudeStorage = (typeof window.storage !== 'undefined') && window.storage && typeof window.storage.get === 'function';
+async function storageGet(key){
+  if(hasClaudeStorage){ try{ return await window.storage.get(key, false); }catch(e){ return null; } }
+  try{ const v = localStorage.getItem(key); return v!==null ? {key, value:v} : null; }catch(e){ return null; }
+}
+async function storageSet(key, value){
+  if(hasClaudeStorage){ try{ return await window.storage.set(key, value, false); }catch(e){ return null; } }
+  try{ localStorage.setItem(key, value); return {key, value}; }catch(e){ return null; }
+}
+
+async function loadLocations(){
+  const r = await storageGet(STORAGE_LOCATIONS_KEY); if(r && r.value) return JSON.parse(r.value);
+  const def = [{id:'main', name:'Quality First Home Improvement'}];
+  await saveLocations(def);
+  return def;
+}
+async function saveLocations(list){ await storageSet(STORAGE_LOCATIONS_KEY, JSON.stringify(list)); }
+
+async function loadChannels(){
+  const r = await storageGet(STORAGE_CHANNELS_KEY); if(r && r.value) return JSON.parse(r.value);
+  await saveChannels(DEFAULT_PLATFORMS);
+  return DEFAULT_PLATFORMS.slice();
+}
+async function saveChannels(list){ await storageSet(STORAGE_CHANNELS_KEY, JSON.stringify(list)); }
+
+async function loadVisibleMetrics(){
+  const r = await storageGet(STORAGE_METRICS_KEY); if(r && r.value) return JSON.parse(r.value);
+  const all = METRICS.map(m=>m.id);
+  await saveVisibleMetrics(all);
+  return all;
+}
+async function saveVisibleMetrics(list){ await storageSet(STORAGE_METRICS_KEY, JSON.stringify(list)); }
+
+async function loadLocationData(id){
+  const r = await storageGet(locKey(id)); if(r && r.value) return JSON.parse(r.value);
+  const seeded = (id === 'main')
+    ? {entries: seedEntries(), topPosts: seedTopPosts(), demographics: seedDemographics()}
+    : {entries: [], topPosts: {}, demographics: {}};
+  await saveLocationData(id, seeded);
+  return seeded;
+}
+async function saveLocationData(id, data){ await storageSet(locKey(id), JSON.stringify(data)); }
+
+async function loadSheetConfig(id){
+  const r = await storageGet(sheetKey(id)); if(r && r.value) return JSON.parse(r.value);
+  return {url:'', autoRefresh:false, lastSynced:null};
+}
+async function saveSheetConfig(id, cfg){ await storageSet(sheetKey(id), JSON.stringify(cfg)); }
+
+// ---------- state ----------
+let PLATFORMS = [];
+let visibleMetrics = [];
+let locations = [];
+let currentLocationId = 'main';
+let currentData = {entries:[], topPosts:{}, demographics:{}};
+let sheetConfig = {url:'', autoRefresh:false, lastSynced:null};
+let autoRefreshTimer = null;
+let currentRange = 'custom';
+let customStart = REPORT_PERIOD.start;
+let customEnd = REPORT_PERIOD.end;
+let activePlatform = 'facebook';
+let selectedMetricByPlatform = {};
+let charts = {};
+let colorCursor = 0;
+
+function fmtDate(d){ return d.toISOString().slice(0,10); }
+function addDays(date, n){ const d = new Date(date); d.setDate(d.getDate()+n); return d; }
+
+function computeRange(){
+  if(currentRange === 'daily') return {start: fmtDate(TODAY), end: fmtDate(TODAY), prevStart: fmtDate(addDays(TODAY,-1)), prevEnd: fmtDate(addDays(TODAY,-1))};
+  if(currentRange === 'weekly') return {start: fmtDate(addDays(TODAY,-6)), end: fmtDate(TODAY), prevStart: fmtDate(addDays(TODAY,-13)), prevEnd: fmtDate(addDays(TODAY,-7))};
+  if(currentRange === 'monthly') return {start: fmtDate(addDays(TODAY,-29)), end: fmtDate(TODAY), prevStart: fmtDate(addDays(TODAY,-59)), prevEnd: fmtDate(addDays(TODAY,-30))};
+  if(currentRange === 'yoy'){
+    const jan1 = new Date(TODAY.getFullYear(),0,1);
+    const jan1Last = new Date(TODAY.getFullYear()-1,0,1);
+    const sameDayLast = new Date(TODAY); sameDayLast.setFullYear(TODAY.getFullYear()-1);
+    return {start: fmtDate(jan1), end: fmtDate(TODAY), prevStart: fmtDate(jan1Last), prevEnd: fmtDate(sameDayLast)};
+  }
+  const s = new Date(customStart), e = new Date(customEnd);
+  const len = Math.max(1, Math.round((e-s)/86400000));
+  const prevEnd = addDays(s,-1);
+  const prevStart = addDays(prevEnd, -len);
+  return {start: customStart, end: customEnd, prevStart: fmtDate(prevStart), prevEnd: fmtDate(prevEnd)};
+}
+function inRange(dateStr, start, end){ return dateStr >= start && dateStr <= end; }
+
+function summarize(platformId, start, end){
+  const rows = currentData.entries.filter(e => e.platform === platformId && inRange(e.date, start, end));
+  if(rows.length === 0) return null;
+  const sum = k => rows.reduce((a,r)=> a + (typeof r[k]==='number' ? r[k] : 0), 0);
+  const avg = k => { const v = rows.filter(r=>typeof r[k]==='number'); return v.length? v.reduce((a,r)=>a+r[k],0)/v.length : null; };
+  const latest = rows.slice().sort((a,b)=> a.date.localeCompare(b.date)).pop();
+  return { followers: latest.followers, impressions: sum('impressions'), interactions: sum('interactions'), posts: sum('posts'), reach: avg('reach'), engagement: avg('engagement') };
+}
+
+function fmtNum(n){
+  if(n===null || n===undefined || isNaN(n)) return '—';
+  if(Math.abs(n) >= 1000) return (n/1000).toFixed(n>=100000?0:1).replace(/\.0$/,'')+'K';
+  return Number.isInteger(n) ? n.toString() : n.toFixed(2);
+}
+function pct(cur, prev){
+  if(prev === null || prev === undefined || prev === 0 || cur===null) return null;
+  return ((cur-prev)/Math.abs(prev))*100;
+}
+function deltaHtml(cur, prev, label){
+  const p = pct(cur, prev);
+  if(p===null) return `<div class="delta flat">no prior data</div>`;
+  const cls = p>0.05 ? 'up' : (p<-0.05 ? 'down':'flat');
+  const arrow = p>0.05 ? '\u25B2' : (p<-0.05 ? '\u25BC' : '\u2013');
+  return `<div class="delta ${cls}">${arrow} ${Math.abs(p).toFixed(1)}% ${label||'vs prior period'}</div>`;
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function destroy(key){ if(charts[key]){ charts[key].destroy(); delete charts[key]; } }
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || ('ch_'+Date.now()); }
+function nextAutoColor(){ const c = AUTO_COLORS[colorCursor % AUTO_COLORS.length]; colorCursor++; return c; }
+
+function sparklineSvg(values, color){
+  const vals = values.filter(v=> typeof v==='number');
+  if(vals.length < 2) return `<svg class="spark" viewBox="0 0 38 16"><line x1="0" y1="8" x2="38" y2="8" stroke="${color}" stroke-opacity=".35" stroke-width="1.4"/></svg>`;
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = (max-min)||1;
+  const pts = vals.map((v,i)=>{ const x=(i/(vals.length-1))*36+1; const y=14-((v-min)/range)*12; return `${x},${y}`; }).join(' ');
+  return `<svg class="spark" viewBox="0 0 38 16"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// ---------- rendering ----------
+function renderRangeButtons(){
+  document.querySelectorAll('#rangeGroup button').forEach(b=> b.classList.toggle('active', b.dataset.range === currentRange));
+  document.getElementById('customRange').classList.toggle('show', currentRange === 'custom');
+}
+function renderPeriodNote(){
+  const r = computeRange();
+  document.getElementById('periodNote').textContent = `${r.start} \u2192 ${r.end}  ·  compared with ${r.prevStart} \u2192 ${r.prevEnd}`;
+}
+function renderLocationSelect(){
+  const sel = document.getElementById('locationSelect');
+  sel.innerHTML = locations.map(l=>`<option value="${l.id}" ${l.id===currentLocationId?'selected':''}>${l.name}</option>`).join('');
+  document.getElementById('locTitle').textContent = 'Social Media Dashboard — ' + ((locations.find(l=>l.id===currentLocationId)||{}).name || '');
+}
+
+function renderChannelManager(){
+  document.getElementById('chanList').innerHTML = PLATFORMS.map(p=>`
+    <div class="chan-chip"><span class="dot" style="background:${p.color}"></span>${p.name}
+      <button data-remove="${p.id}" title="Remove channel">×</button>
+    </div>`).join('');
+  document.getElementById('chanList').querySelectorAll('button[data-remove]').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      if(PLATFORMS.length<=1){ alert("Keep at least one channel."); return; }
+      if(!confirm('Remove this channel from the dashboard? Its logged data stays saved but will be hidden.')) return;
+      const id = b.dataset.remove;
+      PLATFORMS = PLATFORMS.filter(p=>p.id!==id);
+      await saveChannels(PLATFORMS);
+      if(activePlatform===id) activePlatform = PLATFORMS[0].id;
+      renderChannelManager();
+      refreshAll();
+    });
+  });
+}
+
+function renderSheetPanel(){
+  document.getElementById('sheetUrlInput').value = sheetConfig.url || '';
+  document.getElementById('autoRefreshToggle').checked = !!sheetConfig.autoRefresh;
+  document.getElementById('liveDot').style.display = sheetConfig.url ? 'inline-block' : 'none';
+  document.getElementById('lastSyncedLabel').textContent = sheetConfig.lastSynced
+    ? 'Last synced ' + new Date(sheetConfig.lastSynced).toLocaleString()
+    : (sheetConfig.url ? 'Connected — not synced yet' : 'Not connected yet');
+}
+function setSheetStatus(msg, kind){
+  const el = document.getElementById('sheetStatus');
+  el.textContent = msg;
+  el.className = 'sheet-status' + (kind ? ' '+kind : '');
+}
+
+function totalsFor(start,end){
+  const totals = {followers:0, impressions:0, interactions:0, posts:0};
+  let anyFollowers=false;
+  PLATFORMS.forEach(p=>{
+    const s = summarize(p.id, start, end);
+    if(s){
+      totals.impressions += s.impressions||0;
+      totals.interactions += s.interactions||0;
+      totals.posts += s.posts||0;
+      if(typeof s.followers==='number'){ totals.followers += s.followers; anyFollowers = true; }
+    }
+  });
+  totals.followers = anyFollowers ? totals.followers : null;
+  return totals;
+}
+
+function renderOverview(){
+  const r = computeRange();
+  const cur = totalsFor(r.start, r.end);
+  const prev = totalsFor(r.prevStart, r.prevEnd);
+  const cards = [
+    {label:'Total followers', cur: cur.followers, prev: prev.followers},
+    {label:'Total impressions / views', cur: cur.impressions, prev: prev.impressions},
+    {label:'Total interactions', cur: cur.interactions, prev: prev.interactions},
+    {label:'Total posts published', cur: cur.posts, prev: prev.posts},
+  ];
+  document.getElementById('overviewCards').innerHTML = cards.map(c=>`
+    <div class="glass card"><div class="label">${c.label}</div><div class="value num">${fmtNum(c.cur)}</div>${deltaHtml(c.cur,c.prev)}</div>
+  `).join('');
+
+  const rows = PLATFORMS.map(p=>({p, s: summarize(p.id, r.start, r.end)}));
+
+  destroy('platformBar');
+  const ctxBar = document.getElementById('platformBarChart').getContext('2d');
+  charts.platformBar = new Chart(ctxBar, {
+    type:'bar',
+    data:{ labels: rows.map(r=>r.p.name),
+      datasets:[{ data: rows.map(r=> r.s ? r.s.impressions : 0), backgroundColor: rows.map(r=>r.p.color), borderRadius:6, maxBarThickness:24 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'#EEF1F5'}}, y:{grid:{display:false}} } }
+  });
+
+  destroy('shareDonut');
+  const withInter = rows.filter(r=> r.s && r.s.interactions>0);
+  const ctxDonut = document.getElementById('shareDonutChart').getContext('2d');
+  charts.shareDonut = new Chart(ctxDonut, {
+    type:'doughnut',
+    data:{ labels: withInter.map(r=>r.p.name), datasets:[{ data: withInter.map(r=>r.s.interactions), backgroundColor: withInter.map(r=>r.p.color), borderColor:'#fff', borderWidth:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{position:'bottom', labels:{boxWidth:9, font:{size:11}, padding:10}} } }
+  });
+}
+
+function renderTabs(){
+  const wrap = document.getElementById('platformTabs');
+  wrap.innerHTML = PLATFORMS.map(p=>{
+    const rows = currentData.entries.filter(e=>e.platform===p.id).sort((a,b)=>a.date.localeCompare(b.date));
+    return `<div class="tab ${p.id===activePlatform?'active':''}" data-platform="${p.id}" style="${p.id===activePlatform?`background:linear-gradient(180deg, ${p.color}dd, ${p.color});`:''}">
+      <span class="dot" style="background:${p.id===activePlatform?'#fff':p.color}"></span>${p.name}
+      ${sparklineSvg(rows.map(r=>r.followers), p.id===activePlatform?'#ffffff':p.color)}
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.tab').forEach(t=> t.addEventListener('click', ()=>{
+    activePlatform = t.dataset.platform;
+    renderTabs();
+    renderPlatformPanel();
+  }));
+}
+
+function renderPlatformPanel(){
+  const r = computeRange();
+  const platform = PLATFORMS.find(p=>p.id===activePlatform) || PLATFORMS[0];
+  if(!platform){ document.getElementById('platformPanels').innerHTML = '<div class="glass panel empty">No channels yet — add one above.</div>'; return; }
+  const cur = summarize(platform.id, r.start, r.end);
+  const prev = summarize(platform.id, r.prevStart, r.prevEnd);
+
+  const metricCardsHtml = METRICS.filter(m=> visibleMetrics.includes(m.id)).map(m=>{
+    const curVal = cur ? cur[m.id] : null;
+    const prevVal = prev ? prev[m.id] : null;
+    return `<div class="glass card"><div class="label">${m.label}</div><div class="value num">${fmtNum(curVal)}</div>${deltaHtml(curVal,prevVal)}</div>`;
+  }).join('') || '<div class="empty">All metrics hidden — check a box below to show one.</div>';
+
+  const metricToggleHtml = METRICS.map(m=>`
+    <label><input type="checkbox" data-metric-toggle="${m.id}" ${visibleMetrics.includes(m.id)?'checked':''}> ${m.label}</label>
+  `).join('');
+
+  const selectedMetric = selectedMetricByPlatform[platform.id] || 'followers';
+  const topPosts = (currentData.topPosts[platform.id]||[]).slice().sort((a,b)=> b.impressions - a.impressions).slice(0,8);
+  const topPostsRows = topPosts.length ? topPosts.map(tp=>`
+      <tr><td class="muted">${tp.date}</td><td>${escapeHtml(tp.text)}</td><td class="num">${fmtNum(tp.impressions)}</td><td class="num">${fmtNum(tp.interactions)}</td></tr>
+    `).join('') : `<tr><td colspan="4" class="empty">No posts logged yet for ${platform.name}.</td></tr>`;
+
+  const demo = currentData.demographics[platform.id];
+  const demoHtml = demo ? renderDemographics(demo, platform.color) : `<div class="empty">No audience demographics logged for ${platform.name} yet.</div>`;
+
+  const panels = document.getElementById('platformPanels');
+  panels.innerHTML = `
+    <div class="glass panel">
+      <div class="plat-head">
+        <div class="plat-head-left"><span class="swatch" style="background:${platform.color}"></span><h2>${platform.name}</h2></div>
+      </div>
+      <div class="metric-toggle">${metricToggleHtml}</div>
+      <div class="cards" style="margin-top:14px;">${metricCardsHtml}</div>
+
+      <div class="row2" style="margin-top:18px;">
+        <div>
+          <div class="panel-head">
+            <h2 style="font-size:14px;">Trend</h2>
+            <select id="metricSelect" style="font-family:inherit;font-size:12px;border:1px solid var(--line-strong);border-radius:8px;padding:6px 9px;">
+              ${METRICS.map(m=>`<option value="${m.id}" ${m.id===selectedMetric?'selected':''}>${m.label}</option>`).join('')}
+            </select>
+          </div>
+          <div class="chart-wrap short"><canvas id="trendChart"></canvas></div>
+        </div>
+        <div>
+          <div class="panel-head"><h2 style="font-size:14px;">Top posts by impressions</h2></div>
+          <div class="chart-wrap short"><canvas id="postsBarChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="panel-head" style="margin-top:22px;"><h2 style="font-size:14px;">All logged posts</h2></div>
+      <table>
+        <thead><tr><th>Date</th><th>Post</th><th>Impr.</th><th>Interact.</th></tr></thead>
+        <tbody>${topPostsRows}</tbody>
+      </table>
+      <div class="form-row">
+        <input type="date" id="postDate">
+        <input type="text" id="postText" placeholder="Post text / caption">
+        <input type="number" id="postImpr" placeholder="Impressions">
+        <input type="number" id="postInter" placeholder="Interactions">
+        <button class="glossy-btn small-btn" id="addPostBtn">+ Add post</button>
+      </div>
+    </div>
+
+    <div class="glass panel">
+      <div class="panel-head"><h2>Audience demographics</h2><span class="sub">Static reference from last import</span></div>
+      <div class="demo-grid">${demoHtml}</div>
+    </div>
+
+    <div class="glass panel">
+      <div class="panel-head"><h2>Log this period's numbers</h2><span class="sub">Add a new dated snapshot for ${platform.name}</span></div>
+      <div class="form-row">
+        <input type="date" id="entryDate" value="${fmtDate(TODAY)}">
+        <input type="number" id="entryFollowers" placeholder="Followers">
+        <input type="number" id="entryImpressions" placeholder="Impressions / views">
+        <input type="number" id="entryInteractions" placeholder="Interactions">
+        <input type="number" id="entryPosts" placeholder="Posts published">
+        <input type="number" step="0.01" id="entryReach" placeholder="Avg reach / post">
+        <input type="number" step="0.01" id="entryEngagement" placeholder="Engagement rate">
+        <button class="glossy-btn save-btn" id="addEntryBtn">Save entry</button>
+      </div>
+      <div class="form-row" style="margin-top:10px;">
+        <label class="csv-label">📄 Import CSV for this channel
+          <input type="file" id="csvInput" accept=".csv" style="display:none;">
+        </label>
+        <span class="csv-hint">Columns: date, followers, impressions, interactions, posts, reach, engagement. Or use “Connect Google Sheet” above to sync every channel at once.</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('metricSelect').addEventListener('change', (e)=>{ selectedMetricByPlatform[platform.id] = e.target.value; drawTrendChart(platform); });
+  document.getElementById('addEntryBtn').addEventListener('click', ()=> addEntry(platform.id));
+  document.getElementById('addPostBtn').addEventListener('click', ()=> addPost(platform.id));
+  document.getElementById('csvInput').addEventListener('change', (e)=> importCsv(e, platform.id));
+  panels.querySelectorAll('[data-metric-toggle]').forEach(cb=>{
+    cb.addEventListener('change', async ()=>{
+      const id = cb.dataset.metricToggle;
+      if(cb.checked){ if(!visibleMetrics.includes(id)) visibleMetrics.push(id); }
+      else { visibleMetrics = visibleMetrics.filter(m=>m!==id); }
+      await saveVisibleMetrics(visibleMetrics);
+      renderPlatformPanel();
+    });
+  });
+
+  drawTrendChart(platform);
+  drawPostsBarChart(platform, topPosts);
+}
+
+function renderDemographics(demo, color){
+  let html = '';
+  const section = (title, arr) => {
+    const max = Math.max(...arr.map(c=>c[1]));
+    return `<div><h3 style="font-size:13px;margin-bottom:9px;">${title}</h3>` +
+      arr.map(([name,val])=>`<div class="bar"><div class="name">${name}</div><div class="track"><div class="fill" style="width:${(val/max*100)}%;background:${color}"></div></div><div class="pct">${val}%</div></div>`).join('') + `</div>`;
+  };
+  if(demo.countries) html += section('Top countries', demo.countries);
+  if(demo.cities) html += section('Top cities / areas', demo.cities);
+  if(demo.gender) html += section('Gender', demo.gender);
+  if(demo.industries) html += section('Top industries', demo.industries);
+  return html;
+}
+
+function drawTrendChart(platform){
+  const rows = currentData.entries.filter(e=>e.platform===platform.id).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const metric = selectedMetricByPlatform[platform.id] || 'followers';
+  const labels = rows.map(r=>r.date);
+  const data = rows.map(r=> typeof r[metric]==='number' ? r[metric] : null);
+  destroy('trend');
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,220);
+  grad.addColorStop(0, platform.color+'55');
+  grad.addColorStop(1, platform.color+'02');
+  charts.trend = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[{ label: METRICS.find(m=>m.id===metric).label, data, borderColor: platform.color, backgroundColor: grad,
+      tension:.3, fill:true, pointRadius:4, pointBackgroundColor:'#fff', pointBorderColor: platform.color, pointBorderWidth:2, spanGaps:true }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{beginAtZero:true, grid:{color:'#EEF1F5'}}, x:{grid:{display:false}} } }
+  });
+}
+
+function drawPostsBarChart(platform, topPosts){
+  destroy('postsBar');
+  const ctx = document.getElementById('postsBarChart').getContext('2d');
+  if(!topPosts.length){ return; }
+  const labels = topPosts.map(p=> p.text.length>26 ? p.text.slice(0,26)+'…' : p.text);
+  charts.postsBar = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ data: topPosts.map(p=>p.impressions), backgroundColor: platform.color, borderRadius:6, maxBarThickness:20 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'#EEF1F5'}}, y:{grid:{display:false}, ticks:{font:{size:10.5}}} } }
+  });
+}
+
+// ---------- actions ----------
+async function addEntry(platformId){
+  const get = id => document.getElementById(id).value;
+  const num = v => v===''? null : parseFloat(v);
+  const entry = { date: get('entryDate') || fmtDate(TODAY), platform: platformId,
+    followers:num(get('entryFollowers')), impressions:num(get('entryImpressions')), interactions:num(get('entryInteractions')),
+    posts:num(get('entryPosts')), reach:num(get('entryReach')), engagement:num(get('entryEngagement')) };
+  currentData.entries = currentData.entries.filter(e=> !(e.platform===platformId && e.date===entry.date));
+  currentData.entries.push(entry);
+  await saveLocationData(currentLocationId, currentData);
+  refreshAll();
+}
+async function addPost(platformId){
+  const get = id => document.getElementById(id).value;
+  const post = { date: get('postDate') || fmtDate(TODAY), text: get('postText') || '(no text)',
+    impressions: parseFloat(get('postImpr'))||0, interactions: parseFloat(get('postInter'))||0 };
+  if(!currentData.topPosts[platformId]) currentData.topPosts[platformId] = [];
+  currentData.topPosts[platformId].push(post);
+  await saveLocationData(currentLocationId, currentData);
+  renderPlatformPanel();
+}
+function importCsv(evt, platformId){
+  const file = evt.target.files[0];
+  if(!file) return;
+  Papa.parse(file, {
+    header:true, skipEmptyLines:true,
+    complete: async (results)=>{
+      let added = 0;
+      results.data.forEach(row=>{
+        const date = (row.date||row.Date||'').trim();
+        if(!date) return;
+        const num = v => (v===undefined || v===null || v==='') ? null : parseFloat(v);
+        const entry = { date, platform: platformId,
+          followers: num(row.followers ?? row.Followers),
+          impressions: num(row.impressions ?? row.Impressions),
+          interactions: num(row.interactions ?? row.Interactions),
+          posts: num(row.posts ?? row.Posts),
+          reach: num(row.reach ?? row.Reach),
+          engagement: num(row.engagement ?? row.Engagement) };
+        currentData.entries = currentData.entries.filter(e=> !(e.platform===platformId && e.date===entry.date));
+        currentData.entries.push(entry);
+        added++;
+      });
+      await saveLocationData(currentLocationId, currentData);
+      alert(added + ' row(s) imported for ' + (PLATFORMS.find(p=>p.id===platformId)||{}).name + '.');
+      refreshAll();
+    },
+    error: (err)=> alert('Could not read that CSV: ' + err.message)
+  });
+}
+
+// ---------- Google Sheet live sync ----------
+function toCsvExportUrl(url){
+  // Accept a normal "publish to web" link, a normal share link, or an already-CSV link, and try to normalize.
+  if(/output=csv|\/pub\?/.test(url)) return url;
+  const m = url.match(/\/d\/(?:e\/)?([a-zA-Z0-9-_]+)/);
+  if(m && /docs\.google\.com/.test(url) && !/pubhtml|\/pub/.test(url)){
+    // best effort: leave as-is, Google "export?format=csv" needs the /export path which requires edit-level sharing;
+    // published links already contain output=csv or /pub, so we only reach here for non-published links.
+    return url;
+  }
+  return url;
+}
+
+async function syncFromSheet(showAlertIfEmpty){
+  const url = sheetConfig.url;
+  if(!url){ setSheetStatus('Paste a published CSV link first.', 'err'); return; }
+  setSheetStatus('Syncing…');
+  try{
+    const res = await fetch(toCsvExportUrl(url), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const parsed = Papa.parse(text.trim(), {header:true, skipEmptyLines:true});
+    if(parsed.errors && parsed.errors.length && parsed.data.length===0){ throw new Error('Could not parse CSV — check the link is a published CSV export.'); }
+
+    let added = 0, newChannels = 0;
+    parsed.data.forEach(row=>{
+      const chanName = (row.channel || row.Channel || row.platform || row.Platform || '').toString().trim();
+      const date = (row.date || row.Date || '').toString().trim();
+      if(!chanName || !date) return;
+      let plat = PLATFORMS.find(p=> p.name.toLowerCase()===chanName.toLowerCase() || p.id===slug(chanName));
+      if(!plat){
+        plat = {id: slug(chanName), name: chanName, color: nextAutoColor()};
+        PLATFORMS.push(plat);
+        newChannels++;
+      }
+      const num = v => (v===undefined || v===null || v==='') ? null : parseFloat(v);
+      const entry = { date, platform: plat.id,
+        followers: num(row.followers ?? row.Followers),
+        impressions: num(row.impressions ?? row.Impressions),
+        interactions: num(row.interactions ?? row.Interactions),
+        posts: num(row.posts ?? row.Posts),
+        reach: num(row.reach ?? row.Reach),
+        engagement: num(row.engagement ?? row.Engagement) };
+      currentData.entries = currentData.entries.filter(e=> !(e.platform===plat.id && e.date===entry.date));
+      currentData.entries.push(entry);
+      added++;
+    });
+
+    if(newChannels) await saveChannels(PLATFORMS);
+    await saveLocationData(currentLocationId, currentData);
+    sheetConfig.lastSynced = new Date().toISOString();
+    await saveSheetConfig(currentLocationId, sheetConfig);
+    renderSheetPanel();
+    renderChannelManager();
+    refreshAll();
+    setSheetStatus(added ? `Synced ${added} row(s)` + (newChannels ? `, added ${newChannels} new channel(s)` : '') + '.' : (showAlertIfEmpty ? 'Sheet reached, but no rows matched the expected columns.' : ''), added ? 'ok' : 'err');
+  }catch(err){
+    setSheetStatus('Sync failed: ' + err.message + ' — make sure the sheet is published to the web as CSV (File → Share → Publish to web), and that the link is the one from that dialog.', 'err');
+  }
+}
+
+function startAutoRefresh(){
+  stopAutoRefresh();
+  if(sheetConfig.autoRefresh && sheetConfig.url){
+    autoRefreshTimer = setInterval(()=> syncFromSheet(false), 5*60*1000);
+  }
+}
+function stopAutoRefresh(){ if(autoRefreshTimer){ clearInterval(autoRefreshTimer); autoRefreshTimer=null; } }
+
+async function switchLocation(id){
+  currentLocationId = id;
+  currentData = await loadLocationData(id);
+  sheetConfig = await loadSheetConfig(id);
+  renderLocationSelect();
+  renderSheetPanel();
+  startAutoRefresh();
+  refreshAll();
+}
+async function addLocation(){
+  const name = prompt('Name for the new location (e.g. "Reno Branch"):');
+  if(!name) return;
+  const id = 'loc_' + Date.now();
+  locations.push({id, name});
+  await saveLocations(locations);
+  document.getElementById('locationSelect').innerHTML += `<option value="${id}">${name}</option>`;
+  document.getElementById('locationSelect').value = id;
+  await switchLocation(id);
+}
+async function addChannel(){
+  const nameInput = document.getElementById('newChanName');
+  const colorInput = document.getElementById('newChanColor');
+  const name = nameInput.value.trim();
+  if(!name) return;
+  const id = slug(name);
+  if(PLATFORMS.some(p=>p.id===id)){ alert('A channel with that name already exists.'); return; }
+  PLATFORMS.push({id, name, color: colorInput.value});
+  await saveChannels(PLATFORMS);
+  nameInput.value = '';
+  activePlatform = id;
+  renderChannelManager();
+  refreshAll();
+}
+
+function refreshAll(){
+  renderTabs();
+  renderOverview();
+  renderPlatformPanel();
+}
+
+// ---------- init ----------
+async function init(){
+  PLATFORMS = await loadChannels();
+  visibleMetrics = await loadVisibleMetrics();
+  locations = await loadLocations();
+  currentData = await loadLocationData(currentLocationId);
+  sheetConfig = await loadSheetConfig(currentLocationId);
+  activePlatform = PLATFORMS[0] ? PLATFORMS[0].id : 'facebook';
+  renderLocationSelect();
+  renderChannelManager();
+  renderSheetPanel();
+  renderRangeButtons();
+  renderPeriodNote();
+  refreshAll();
+  startAutoRefresh();
+
+  document.getElementById('customStart').value = customStart;
+  document.getElementById('customEnd').value = customEnd;
+
+  document.querySelectorAll('#rangeGroup button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      currentRange = b.dataset.range;
+      renderRangeButtons(); renderPeriodNote(); renderOverview(); renderPlatformPanel();
+    });
+  });
+  document.getElementById('applyCustom').addEventListener('click', ()=>{
+    customStart = document.getElementById('customStart').value || customStart;
+    customEnd = document.getElementById('customEnd').value || customEnd;
+    currentRange = 'custom';
+    renderRangeButtons(); renderPeriodNote(); renderOverview(); renderPlatformPanel();
+  });
+  document.getElementById('locationSelect').addEventListener('change', (e)=> switchLocation(e.target.value));
+  document.getElementById('addLocationBtn').addEventListener('click', addLocation);
+  document.getElementById('manageChannelsBtn').addEventListener('click', ()=> document.getElementById('chanManager').classList.toggle('show'));
+  document.getElementById('addChanBtn').addEventListener('click', addChannel);
+
+  document.getElementById('toggleSheetBtn').addEventListener('click', ()=> document.getElementById('sheetPanel').classList.toggle('show'));
+  document.getElementById('saveSheetBtn').addEventListener('click', async ()=>{
+    sheetConfig.url = document.getElementById('sheetUrlInput').value.trim();
+    await saveSheetConfig(currentLocationId, sheetConfig);
+    renderSheetPanel();
+    setSheetStatus('Saved. Click "Sync now" to pull data.', 'ok');
+  });
+  document.getElementById('syncNowBtn').addEventListener('click', async ()=>{
+    sheetConfig.url = document.getElementById('sheetUrlInput').value.trim();
+    await saveSheetConfig(currentLocationId, sheetConfig);
+    syncFromSheet(true);
+  });
+  document.getElementById('autoRefreshToggle').addEventListener('change', async (e)=>{
+    sheetConfig.autoRefresh = e.target.checked;
+    await saveSheetConfig(currentLocationId, sheetConfig);
+    startAutoRefresh();
+  });
+
+  if(sheetConfig.url) syncFromSheet(false);
+}
+
+init();
+})();
+</script>
+
+
+</body></html>
